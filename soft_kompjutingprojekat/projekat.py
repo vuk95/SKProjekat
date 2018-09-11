@@ -69,10 +69,9 @@ def main(filename):
 
             elif len(closeNumbers) == 1:
 
-                # update broja
-
                 prev = {'frameNum': frmCount, 'dot': dictNumber['dot'], 'kontura': dictNumber['kontura']}
 
+                #posto je close numbers lista koja ima samo jedan element ovde uzmemo bas indeks broja za koji zelimo da azuriramo
                 all[closeNumbers[0]]['previousStates'].append(prev)
                 all[closeNumbers[0]]['frameNum'] = frmCount
                 all[closeNumbers[0]]['dot'] = dictNumber['dot']
@@ -98,9 +97,9 @@ def main(filename):
                     cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 0, 255), 2)
 
 
-            for prev in number['previousStates']:
-                if frmCount - prev['frameNum'] < 60:
-                    cv2.circle(frame, prev['dot'], 1, (0, 255, 255), 1)
+            #for prev in number['previousStates']:
+                #if frmCount - prev['frameNum'] < 40:
+                    #cv2.circle(frame, prev['dot'], 1, (0, 255, 255), 1)
 
             #ako nije presao liniju racunamo udaljenost ako je blizu setujemo da je presao
             if not number['presaoLiniju']:
@@ -140,14 +139,17 @@ def prepoznaj(kontura, frame, classifier):
 
     extra = 12
     number = gray[yCenterDot - extra:yCenterDot + extra, xCenterDot - extra:xCenterDot + extra]
-    # cv2.imshow("broj", number)
+    #cv2.imshow("broj", number)
     _, number = cv2.threshold(number, 165, 255, cv2.THRESH_BINARY)
+
     kernel = np.ones((1, 1), np.uint8)
     opening = cv2.morphologyEx(number, cv2.MORPH_OPEN, kernel)
     dilation = cv2.dilate(opening, kernel, iterations=1)
     erosion = cv2.erode(opening, kernel, iterations=1)
 
+    #error bez ovoga da li je prazan niz
     if not np.shape(number) == ():
+
         number = crop_num(number)
         cv2.imshow("number", number)
         num = classifier.predict_classes(number.reshape(1, 28, 28, 1))
@@ -299,6 +301,7 @@ def nadjiLiniju(filename):
     light_blue = np.array([110, 50, 50])
     dark_blue = np.array([140, 255, 255])
     mask = cv2.inRange(hsv, light_blue, dark_blue)
+    #cv2.imshow('mask', mask)
     #prima sliku donji i gornji threshold
     edges = cv2.Canny(mask, 75, 150)
     #cv2.imshow('edges',edges)
